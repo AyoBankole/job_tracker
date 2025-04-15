@@ -1,0 +1,7 @@
+datetime
+streamlit
+pandas
+numpy
+pillow
+sqlite3
+requests
