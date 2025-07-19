@@ -1,179 +1,171 @@
-import streamlit as st
-import datetime
-from business_layer import (
-    register_user, update_user, delete_user, get_user_by_email,
-    add_application, update_application, delete_application, get_applications,
-    add_scholarship, update_scholarship, delete_scholarship, get_scholarships,
-    add_reminder, update_reminder, delete_reminder, get_reminders_for_user
-)
-from data_base import create_connection, create_tables
+from dotenv import load_dotenv
+load_dotenv() # This must be the first line to load .env variables
 
-# -- CUSTOM CSS STYLES WITH SDG8 THEME --
-custom_css = """
+import streamlit as st
+from business_layer import register_user, get_user_by_fellow_id
+from data_base import create_tables
+
+# --- Page Configuration ---
+st.set_page_config(
+    page_title="Welcome - Application Tracker",
+    page_icon="assets/grad.png",
+    layout="centered"
+)
+
+# --- Initialize Database ---
+create_tables()
+
+# --- NEW "Midnight Blue" CSS Theme ---
+st.markdown("""
 <style>
-/* Import Google Font: Roboto */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-html, body, [class*="css"] {
-    font-family: 'Roboto', sans-serif;
-}
-/* SDG8 Theme Color Variables */
+/* --- Google Font Import --- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
+
+/* --- Root Variables for "Midnight Blue" Theme --- */
 :root {
-    --sdg-primary: #A21942;
-    --sdg-secondary: #FD7F00;
-    --sdg-background: #F7F7F7;
+    --primary-color: #0a2540;    /* Midnight Blue */
+    --accent-color: #d4af37;     /* Gold for accents */
+    --background-color: #f0f2f6; /* Light Gray */
+    --card-background-color: #ffffff;
+    --text-color: #334155;       /* Slate */
+    --subtle-text-color: #64748b;
+    --border-color: #e2e8f0;
 }
-/* Apply background color */
+
+/* --- Global Styles --- */
+html, body, [class*="css"] {
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-color);
+}
 .stApp {
-    background-color: var(--sdg-background);
+    background-color: var(--background-color);
 }
-/* Header styling */
-h1 { color: var(--sdg-primary); font-size: 3rem; text-align: center; }
-h2, h3, h4 { color: var(--sdg-secondary); }
-/* Button styling */
+
+/* --- Typography --- */
+h1 {
+    font-weight: 700;
+    color: var(--primary-color);
+    text-align: center;
+    padding-bottom: 0.5rem;
+}
+h2, h3, h4 {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+/* --- Main Containers & Cards --- */
+[data-testid="stForm"] {
+    background-color: var(--card-background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
+}
+
+/* --- Button Styling --- */
 div.stButton > button {
-    background-color: var(--sdg-primary);
+    background-color: var(--primary-color);
     color: white;
     border: none;
-    padding: 0.5em 1em;
-    margin: 1em 0;
-    border-radius: 5px;
+    padding: 12px 24px;
+    margin-top: 1rem;
+    border-radius: 8px;
+    font-weight: 500;
     font-size: 1rem;
+    transition: all 0.3s ease-in-out;
+    width: 100%;
 }
-/* Input label styling */
-div.stTextInput > label { color: var(--sdg-secondary); font-size: 1rem; }
-/* Adding margins for content */
-.css-1d391kg { padding: 2rem; }
-/* Logo container styling for side-by-side images */
-.logo-container { display: flex; justify-content: center; gap: 2rem; padding: 1rem; }
-.logo-container img { max-width: 150px; height: auto; }
+div.stButton > button:hover {
+    background-color: #1e3a5f; /* Darker blue on hover */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+/* --- Input & Form Styling --- */
+div.stTextInput > label, div.stDateInput > label {
+    font-weight: 500;
+    color: var(--subtle-text-color);
+}
+div.stTextInput > div > div > input, .stDateInput > div > div > input {
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    transition: all 0.2s ease;
+}
+div.stTextInput > div > div > input:focus, .stDateInput > div > div > input:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+}
+
+/* --- Logo Styling --- */
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    padding: 1rem 0 2rem 0;
+}
+.logo-container img {
+    max-height: 50px;
+    width: auto;
+    filter: grayscale(50%);
+    opacity: 0.8;
+}
 </style>
-"""
-st.markdown(custom_css, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
-# --- Sidebar: User Registration with User Logo ---
-import streamlit as st
+# --- Page Content ---
+st.title("🚀 Application Tracker")
 
-# Initialize session state to store user info
-if "registered" not in st.session_state:
-    st.session_state.registered = False
-if "full_name" not in st.session_state:
-    st.session_state.full_name = ""
+# --- Logo Container ---
+st.markdown('<div class="logo-container">', unsafe_allow_html=True)
+col1_img, col2_img, col3_img = st.columns(3)
+with col1_img:
+    st.image("assets\Federal-Government-3MTT-Programme.jpg")
+with col2_img:
+    st.image("assets/grad.png")
+with col3_img:
+    st.image("assets\Ai_guy.jpg")
+st.markdown('</div>', unsafe_allow_html=True)
 
-# Display image with user's name if registered, else default caption
-caption = st.session_state.full_name if st.session_state.registered else "Welcome!"
-st.sidebar.image("profile.png", width=100, caption=caption)  
+st.markdown("<h4 style='text-align: center; color: var(--subtle-text-color);'>Log in or register to manage your opportunities.</h4>", unsafe_allow_html=True)
 
-st.sidebar.header("User Registration")
-st.sidebar.markdown("Register to start tracking opportunities.")
+# --- Login and Registration Forms ---
+col1, col2 = st.columns(2)
 
-with st.sidebar.form("registration_form"):
-    full_name = st.text_input("Full Name")
-    education_level = st.selectbox("Education Level", ["Select", "Undergraduate", "Graduate", "Postgraduate", "Other"])
-    university = st.text_input("University")
-    course = st.text_input("Course of Study")
-    email = st.text_input("Email")
-    reg_submitted = st.form_submit_button("Register")
-    
-    if reg_submitted:
-        if all([full_name, education_level != "Select", university, course, email]):
-            user_id = register_user(full_name, education_level, university, course, email)
-            st.session_state.full_name = full_name
-            st.session_state.registered = True
-            st.sidebar.success(f"Welcome {full_name}! Registered successfully. Your User ID is {user_id}")
-        else:
-            st.sidebar.error("Please fill in all required fields.")
+with col1:
+    with st.form("login_form"):
+        st.subheader("Login")
+        fellow_id_login = st.text_input("Enter your Fellow ID")
+        login_submitted = st.form_submit_button("Login")
 
-# --- Main Area: Display 3 Logos Side-by-Side ---
-cols = st.columns(3)
-with cols[0]:
-    st.image("cropped-logo2.jpg", caption="MushinToTheWorld Foundation", width=150)
-with cols[1]:
-    st.image("grad.png", width=150)
-with cols[2]:
-    st.image("Mushin-Local-Government-1.jpg", caption="Mushin Local Government", width=150)
+        if login_submitted and fellow_id_login:
+            user = get_user_by_fellow_id(fellow_id_login)
+            if user:
+                st.session_state['logged_in'] = True
+                st.session_state['user_id'] = user[0]
+                st.session_state['fellow_id'] = user[1]
+                st.session_state['full_name'] = user[2]
+                st.success(f"Welcome back, {user[2]}!")
+                st.info("Click on 'Tracker' in the sidebar to manage your applications.")
+            else:
+                st.error("Fellow ID not found. Please register first.")
 
-# Dedicated SDG Message
-st.markdown("<h4 style='text-align: center; color: var(--sdg-secondary);'>Advancing Decent Work & Education Through Smart Tracking.</h4>", unsafe_allow_html=True)
+with col2:
+    with st.form("registration_form"):
+        st.subheader("Register")
+        fellow_id_reg = st.text_input("Fellow ID")
+        full_name_reg = st.text_input("Full Name")
+        email_reg = st.text_input("Email")
+        reg_submitted = st.form_submit_button("Register")
 
-# --- Initialize the Database ---
-conn = create_connection()
-if conn:
-    create_tables(conn)
-    conn.close()
+        if reg_submitted and fellow_id_reg and full_name_reg and email_reg:
+            user_id = register_user(fellow_id_reg, full_name_reg, email_reg)
+            if user_id:
+                st.success(f"Registration successful, {full_name_reg}! You can now log in.")
+            else:
+                st.error("An error occurred. This Fellow ID might already be registered.")
 
-st.title("Job & Scholarship Application Tracker")
-
-# --- Dashboard: User Login ---
-st.header("Dashboard")
-st.markdown("Enter your registered email to continue and manage your applications.")
-user_email = st.text_input("Registered Email", key="login_email")
-
-if user_email:
-    user = get_user_by_email(user_email)
-    if user:
-        user_id = user[0]
-        st.write(f"Welcome, **{user[1]}** (User ID: {user_id})!")
-        
-        # --- Job Application Section ---
-        st.subheader("Job Applications")
-        st.markdown("Add your job applications below:")
-        with st.form("job_application_form"):
-            company = st.text_input("Company Name", key="company")
-            job_title = st.text_input("Job Title", key="job_title")
-            application_date = st.date_input("Application Date", datetime.date.today(), key="app_date")
-            job_submitted = st.form_submit_button("Add Job Application")
-            if job_submitted:
-                add_application(user_id, company, job_title, application_date.isoformat())
-                st.success("Job application added successfully!")
-        
-        st.subheader("Your Job Applications")
-        applications = get_applications(user_id)
-        if applications:
-            for app in applications:
-                st.markdown(f"**ID:** {app[0]}  |  **Company:** {app[2]}  |  **Job Title:** {app[3]}  |  **Date:** {app[4]}  |  **Status:** {app[5]}")
-        else:
-            st.info("No job applications found.")
-        
-        # --- Scholarship Application Section ---
-        st.subheader("Scholarship Applications")
-        st.markdown("Add your scholarship applications below:")
-        with st.form("scholarship_form"):
-            scholarship_name = st.text_input("Scholarship Name", key="scholarship_name")
-            scholarship_application_date = st.date_input("Application Date", datetime.date.today(), key="scholarship_app_date")
-            deadline = st.date_input("Deadline", datetime.date.today(), key="deadline")
-            sch_submitted = st.form_submit_button("Add Scholarship Application")
-            if sch_submitted:
-                add_scholarship(user_id, scholarship_name, scholarship_application_date.isoformat(), deadline.isoformat())
-                st.success("Scholarship application added successfully!")
-        
-        st.subheader("Your Scholarship Applications")
-        scholarships = get_scholarships(user_id)
-        if scholarships:
-            for sch in scholarships:
-                st.markdown(f"**ID:** {sch[0]}  |  **Scholarship:** {sch[2]}  |  **Date:** {sch[3]}  |  **Deadline:** {sch[4]}  |  **Status:** {sch[5]}")
-        else:
-            st.info("No scholarship applications found.")
-
-        # --- Reminders Section ---
-        st.subheader("Reminders")
-        st.markdown("Set up reminders for your upcoming interviews or scholarship deadlines.")
-        with st.form("reminder_form"):
-            # For simplicity we ask for an Application ID from the user's applications.
-            reminder_application_id = st.number_input("Application ID", min_value=1, step=1, key="rem_app_id")
-            reminder_date = st.date_input("Reminder Date", datetime.date.today(), key="rem_date")
-            reminder_message = st.text_input("Reminder Message", key="rem_message")
-            rem_submitted = st.form_submit_button("Add Reminder")
-            if rem_submitted:
-                add_reminder(reminder_application_id, reminder_date.isoformat(), reminder_message)
-                st.success("Reminder added successfully!")
-        
-        st.subheader("Your Reminders")
-        reminders = get_reminders_for_user(user_id)
-        if reminders:
-            for rem in reminders:
-                st.markdown(f"**Reminder ID:** {rem[0]}  |  **Application ID:** {rem[1]}  |  **Date:** {rem[2]}  |  **Message:** {rem[3]}")
-        else:
-            st.info("No reminders found.")
-
-    else:
-        st.error("Email not registered. Please register using the sidebar.")
+# --- Sidebar ---
+st.sidebar.image("assets/profile.png", width=100)
+st.sidebar.info("This is a multi-page app. Once logged in, navigate using the sidebar.")

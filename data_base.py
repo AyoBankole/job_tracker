@@ -1,81 +1,62 @@
-# data_base.py
-import sqlite3
+import psycopg2
+import streamlit as st
+from config import DATABASE_URL
 
-DB_FILE = "job_tracker.db"
-
-def create_connection(db_file=DB_FILE):
-    """Create a database connection to the SQLite database."""
+def get_db_connection():
+    """Create a database connection to the PostgreSQL database."""
+    if not DATABASE_URL:
+        st.error("DATABASE_URL is not set. Please configure it in your environment.")
+        return None
     conn = None
     try:
-        conn = sqlite3.connect(db_file, check_same_thread=False)
-        print("Database connection established.")
-    except sqlite3.Error as e:
-        print(f"Error connecting to database: {e}")
+        conn = psycopg2.connect(DATABASE_URL)
+    except psycopg2.OperationalError as e:
+        st.error(f"Could not connect to the database. Please check your configuration. Error: {e}")
     return conn
 
-def create_tables(conn):
-    """Create tables for users, applications, scholarships, and reminders."""
-    try:
-        cursor = conn.cursor()
-        # Users table with extra registration fields
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                full_name TEXT,
-                education_level TEXT,
-                university TEXT,
-                course TEXT,
-                email TEXT UNIQUE,
-                created_at TEXT DEFAULT (datetime('now'))
-            )
-        """)
-        # Applications table linked to users
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS applications (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                company TEXT NOT NULL,
-                job_title TEXT NOT NULL,
-                application_date TEXT,
-                status TEXT DEFAULT 'Pending',
-                FOREIGN KEY(user_id) REFERENCES users(id)
-            )
-        """)
-        # Scholarships table linked to users
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS scholarships (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                scholarship_name TEXT NOT NULL,
-                application_date TEXT,
-                deadline TEXT,
-                status TEXT DEFAULT 'Pending',
-                FOREIGN KEY(user_id) REFERENCES users(id)
-            )
-        """)
-        # Reminders table linked to applications (or scholarships if needed)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS reminders (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                application_id INTEGER,
-                reminder_date TEXT,
-                message TEXT,
-                FOREIGN KEY(application_id) REFERENCES applications(id)
-            )
-        """)
-        conn.commit()
-        print("Tables created successfully.")
-    except sqlite3.Error as e:
-        print(f"Error creating tables: {e}")
+def create_tables():
+    """Create tables for users, applications, and scholarships if they don't exist."""
+    conn = get_db_connection()
+    if conn is None:
+        return
         
-# def drop_users_table(conn):
-#     cursor = conn.cursor()
-#     cursor.execute("DROP TABLE IF EXISTS users")
-#     conn.commit()
-#     print("Users table dropped.")
-
-if __name__ == "__main__":
-    conn = create_connection()
-    if conn:
-        create_tables(conn)
-        conn.close()
+    try:
+        with conn.cursor() as cur:
+            # Users table updated for new registration fields
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    id SERIAL PRIMARY KEY,
+                    fellow_id TEXT UNIQUE NOT NULL,
+                    full_name TEXT,
+                    email TEXT,
+                    created_at TIMESTAMPTZ DEFAULT NOW()
+                )
+            """)
+            # Applications table
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS applications (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                    company TEXT NOT NULL,
+                    job_title TEXT NOT NULL,
+                    application_date DATE,
+                    status TEXT DEFAULT 'Pending'
+                )
+            """)
+            # Scholarships table
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS scholarships (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                    scholarship_name TEXT NOT NULL,
+                    application_date DATE,
+                    deadline DATE,
+                    status TEXT DEFAULT 'Pending'
+                )
+            """)
+            conn.commit()
+    except psycopg2.Error as e:
+        st.error(f"Error creating tables: {e}")
+    finally:
+        if conn:
+            conn.close()
