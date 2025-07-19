@@ -1,95 +1,181 @@
-# 🚀 Job & Scholarship Application Tracker 📝
+# 🚀 Professional Job & Scholarship Application Tracker
 
-## Overview
+A sophisticated, multi-page Streamlit application designed to help users efficiently track their job and scholarship applications. This tool is built for cloud deployment and features a modern, clean user interface.
 
-This application is a Streamlit-based tool designed to help users track their job and scholarship applications efficiently. It allows users to register 👤, log in 🔑, add new applications ➕, and set reminders ⏰ for important deadlines or interview dates. The application features a user-friendly interface with a custom theme inspired by SDG8 (Decent Work and Economic Growth) 🌱.
+<!-- Optional: Add a screenshot of your app later -->
 
-## Key Features
+## ✨ Key Features
 
-* **User Registration:** New users can register their details through a sidebar form. ✅
-* **Dashboard Login:** Registered users can log in using their email to access their application tracking dashboard. 🚪
-* **Job Application Tracking:** Users can add and view their job applications, including company name, job title, and application date. 💼
-* **Scholarship Application Tracking:** Users can add and view their scholarship applications, including scholarship name, application date, and deadline. 🎓
-* **Reminders:** Users can set reminders for specific application IDs with a date and message. 🔔
-* **Database Integration:** The application interacts with a database (defined in `data_base.py`) to store and retrieve user and application data. 💾
-* **Custom Theming:** The application is styled with a custom CSS theme that incorporates the color palette of SDG8, providing a visually appealing and relevant user experience. 🎨
-* **Responsive Design:** Built with Streamlit, the application offers a responsive layout that adapts to different screen sizes.📱
+* **Secure User Authentication:** A robust registration and login system using a unique `Fellow ID`.
 
-## Technologies Used
+* **Multi-Page Interface:** A dedicated login/registration page and a separate, full-featured dashboard for tracking applications.
 
-* **Python:** 🐍 The primary programming language used.
-* **Streamlit:** 🌊 A Python library used to create the web application interface.
-* **datetime:** 🗓️ A Python module for working with dates.
-* **Custom Modules:**
-    * `business_layer.py`: ⚙️ Contains functions for handling the business logic of the application (e.g., registering users, adding applications).
-    * `data_base.py`: 📦 Contains functions for interacting with the database (e.g., creating connections, creating tables).
+* **Dual Tracking:** Add, view, and manage both job and scholarship applications in separate, organized sections.
 
-## Installation
+* **Automated In-App Reminders:** Automatically receive on-screen notifications for scholarship deadlines that are approaching within the next 7 days.
 
-1.  **Clone the repository (if applicable):**
-    ```bash
-    git clone <repository_url>
-    cd <project_directory>
-    ```
+* **Data Export:** Download your job or scholarship application data to a CSV file with a single click.
 
-2.  **Install required Python packages:**
-    Ensure you have Python installed on your system. Then, install the necessary libraries using pip:
-    ```bash
-    pip install streamlit
-    # Assuming your business_layer and data_base modules might have other dependencies, install them as well.
-    # For example, if you are using SQLite, you might not need to install anything extra.
-    # If you are using other databases like PostgreSQL or MySQL, you'll need their respective Python drivers.
-    # Example for PostgreSQL: pip install psycopg2-binary
-    # Example for MySQL: pip install mysql-connector-python
-    ```
-    **Note:** Replace `<repository_url>` with the actual URL of your project repository.
+* **Cloud-Ready Database:** Utilizes PostgreSQL, making it perfect for deployment on platforms like Render.
 
-3.  **Set up the database:**
-    Ensure that your database is set up and accessible. The `data_base.py` module likely contains the logic to create the database and tables if they don't exist. You might need to configure the database connection details within `data_base.py`. 🛠️
+* **Modern UI/UX:** A professional "Midnight Blue" theme with a focus on readability and ease of use.
 
-## Usage
+## 🛠️ Technologies Used
 
-1.  **Run the Streamlit application:**
-    Navigate to the directory containing the main Python script (the one provided in the code block) and run the following command in your terminal:
-    ```bash
-    streamlit run your_script_name.py
-    ```
-    Replace `your_script_name.py` with the actual name of your Python file. ▶️
+* **Backend:** Python
 
-2.  **Access the application in your browser:**
-    Streamlit will automatically open a new tab in your web browser with the application running. The URL will typically be `http://localhost:8501`. 🌐
+* **Web Framework:** Streamlit
 
-3.  **User Registration:**
-    * On the sidebar, under "User Registration", fill in the required details (Full Name, Education Level, University, Course of Study, Email). 📝
-    * Click the "Register" button. ✍️
-    * If successful, a confirmation message will appear on the sidebar, along with your assigned User ID. 👍
+* **Database:** PostgreSQL
 
-4.  **Dashboard Login:**
-    * In the main section of the application, under "Dashboard", enter the email address you used during registration in the "Registered Email" field. 📧
-    * The application will recognize your email and display a welcome message with your name and User ID. 👋
+* **Python Libraries:**
 
-5.  **Tracking Job Applications:**
-    * Under the "Job Applications" section, fill in the "Company Name", "Job Title", and select the "Application Date". 🏢
-    * Click the "Add Job Application" button to save the entry. ✅
-    * Your added job applications will be listed under the "Your Job Applications" section. 📑
+  * `psycopg2-binary` for PostgreSQL connection.
 
-6.  **Tracking Scholarship Applications:**
-    * Under the "Scholarship Applications" section, fill in the "Scholarship Name", select the "Application Date", and the "Deadline". 💰
-    * Click the "Add Scholarship Application" button to save the entry. ✅
-    * Your added scholarship applications will be listed under the "Your Scholarship Applications" section. 📜
+  * `pandas` for data manipulation.
 
-7.  **Setting Reminders:**
-    * Under the "Reminders" section, enter the "Application ID" (the ID of the job or scholarship application you want to set a reminder for), select the "Reminder Date", and enter a "Reminder Message". 🔔
-    * Click the "Add Reminder" button to save the reminder. ✅
-    * Your added reminders will be listed under the "Your Reminders" section. 🗓️
+  * `python-dotenv` for managing environment variables.
 
-## Customization
+## 📂 Project Structure
 
-The application's appearance is customized using CSS styles defined within the Python script. These styles are themed around SDG8. You can modify the look and feel of the application by:
+The project is organized into a modular and scalable structure, ideal for a multi-page Streamlit application.
 
-* **Editing the `custom_css` variable:** Change the color variables (`--sdg-primary`, `--sdg-secondary`, `--sdg-background`) or any other CSS properties to match your preferences or branding. 🎨
-* **Adding more specific CSS rules:** Target specific elements or classes within the Streamlit application to apply more detailed styling. Refer to Streamlit's documentation for more information on available classes and how to inspect elements. ✨
+```
+job_scholarship_tracker/
+│
+├── assets/
+│   └── (Your images: profile.png, grad.png, etc.)
+│
+├── pages/
+│   └── 1_Tracker.py        # The main dashboard page
+│
+├── .gitignore              # Specifies files for Git to ignore
+├── business_layer.py       # Handles core application logic
+├── config.py               # Manages configuration (e.g., database URL)
+├── data_base.py            # Handles database connection and setup
+├── main_app.py             # The login and registration page
+└── requirements.txt        # Lists project dependencies
 
-## Project Structure
+```
 
-The project likely has the following structure:
+## ⚙️ Local Setup and Installation
+
+Follow these steps to run the application on your local machine.
+
+### 1. Prerequisites
+
+* Python 3.8+
+
+* Git
+
+* A free PostgreSQL database (e.g., from [Render](https://render.com/))
+
+### 2. Clone the Repository
+
+```
+git clone [https://github.com/AyoBankole/job_tracker.git](https://github.com/AyoBankole/job_tracker.git)
+cd job_tracker
+
+```
+
+### 3. Set Up a Virtual Environment
+
+It's highly recommended to use a virtual environment to manage project dependencies.
+
+```
+# For Windows
+python -m venv venv
+venv\Scripts\activate
+
+# For macOS/Linux
+python3 -m venv venv
+source venv/bin/activate
+
+```
+
+### 4. Install Dependencies
+
+Install all the required packages using the `requirements.txt` file.
+
+```
+pip install -r requirements.txt
+
+```
+
+### 5. Configure Environment Variables
+
+The application requires a database URL to connect to.
+
+* Create a file named `.env` in the root of your project folder.
+
+* Add the following line to it, replacing the placeholder with your **External Connection URL** from your PostgreSQL provider.
+
+  * **Important:** Add `?sslmode=require` to the end of your URL.
+
+```
+DATABASE_URL="postgres://user:password@external-host.com/database_name?sslmode=require"
+
+```
+
+* Ensure your `.gitignore` file contains `.env` to keep your database credentials secure.
+
+### 6. Run the Application
+
+The `create_tables()` function will run automatically on the first start to set up your database schema.
+
+```
+streamlit run main_app.py
+
+```
+
+Open your browser and navigate to `http://localhost:8501`.
+
+## ☁️ Deployment on Render
+
+This application is optimized for deployment on a platform like Render.
+
+1. **Push to GitHub:** Ensure your latest code is pushed to your GitHub repository.
+
+2. **Create a Web Service:** On the Render dashboard, create a new **Web Service** and connect it to your GitHub repository.
+
+3. **Configure Settings:**
+
+   * **Runtime:** `Python 3`
+
+   * **Build Command:** `pip install -r requirements.txt`
+
+   * **Start Command:** `streamlit run main_app.py`
+
+4. **Add Environment Variable:**
+
+   * Go to the **Environment** tab for your new web service.
+
+   * Add a new environment variable:
+
+     * **Key:** `DATABASE_URL`
+
+     * **Value:** Paste your **Internal Connection URL** from your Render PostgreSQL database, making sure to add `?sslmode=require` to the end.
+
+5. **Deploy:** Click "Create Web Service". Render will build and deploy your application.
+
+## 🚀 How to Use the App
+
+1. **Register:** On the main page, fill in your `Fellow ID`, `Full Name`, and `Email` in the registration form.
+
+2. **Login:** Use your unique `Fellow ID` to log in.
+
+3. **Navigate:** Once logged in, use the sidebar to navigate to the **Tracker** page.
+
+4. **Add Applications:** Use the "Add a New Job/Scholarship Application" sections to enter your data.
+
+5. **View & Export:** Your applications will appear in tables. Use the "Download as CSV" button to export your data.
+
+6. **Get Reminders:** The app will automatically show you alerts for any scholarship deadlines that are 7 days away or less.
+
+## ✍️ Author
+
+* **AyoBankole** - [GitHub Profile](https://github.com/AyoBankole)
+
+## 📜 License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
