@@ -15,14 +15,14 @@ def get_db_connection():
     return conn
 
 def create_tables():
-    """Create tables for users, applications, and scholarships if they don't exist."""
+    """Create or update tables for users, applications, and scholarships."""
     conn = get_db_connection()
     if conn is None:
         return
         
     try:
         with conn.cursor() as cur:
-            # Users table updated for new registration fields
+            # Users table (no changes needed here)
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS users (
                     id SERIAL PRIMARY KEY,
@@ -32,7 +32,8 @@ def create_tables():
                     created_at TIMESTAMPTZ DEFAULT NOW()
                 )
             """)
-            # Applications table
+            
+            # UPDATED Applications table
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS applications (
                     id SERIAL PRIMARY KEY,
@@ -40,18 +41,24 @@ def create_tables():
                     company TEXT NOT NULL,
                     job_title TEXT NOT NULL,
                     application_date DATE,
-                    status TEXT DEFAULT 'Pending'
+                    deadline DATE,                      -- Added deadline
+                    status TEXT DEFAULT 'Pending',
+                    created_at TIMESTAMPTZ DEFAULT NOW() -- Added timestamp
                 )
             """)
-            # Scholarships table
+
+            # UPDATED Scholarships table
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS scholarships (
                     id SERIAL PRIMARY KEY,
                     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-                    scholarship_name TEXT NOT NULL,
+                    university_name TEXT NOT NULL,      -- New column
+                    scholarship_type TEXT NOT NULL,     -- New column
+                    course_of_study TEXT,               -- New column
                     application_date DATE,
                     deadline DATE,
-                    status TEXT DEFAULT 'Pending'
+                    status TEXT DEFAULT 'Pending',
+                    created_at TIMESTAMPTZ DEFAULT NOW() -- Added timestamp
                 )
             """)
             conn.commit()

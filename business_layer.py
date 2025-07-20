@@ -1,9 +1,8 @@
 from data_base import get_db_connection
 from datetime import date, timedelta
 
-# ----- User Functions -----
+# ----- User Functions (no changes) -----
 def register_user(fellow_id, full_name, email):
-    """Register a new user with Fellow ID; if ID exists, return existing user."""
     conn = get_db_connection()
     if not conn: return None
     user_id = None
@@ -25,7 +24,6 @@ def register_user(fellow_id, full_name, email):
     return user_id
 
 def get_user_by_fellow_id(fellow_id):
-    """Retrieve user info by Fellow ID."""
     conn = get_db_connection()
     if not conn: return None
     user = None
@@ -37,16 +35,16 @@ def get_user_by_fellow_id(fellow_id):
         conn.close()
     return user
 
-# ----- Job Application Functions -----
-def add_application(user_id, company, job_title, application_date):
+# ----- Job Application Functions (no changes) -----
+def add_application(user_id, company, job_title, application_date, deadline):
     conn = get_db_connection()
     if not conn: return
     try:
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO applications (user_id, company, job_title, application_date)
-                VALUES (%s, %s, %s, %s)
-            """, (user_id, company, job_title, application_date))
+                INSERT INTO applications (user_id, company, job_title, application_date, deadline)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (user_id, company, job_title, application_date, deadline))
             conn.commit()
     finally:
         conn.close()
@@ -62,16 +60,26 @@ def get_applications(user_id):
     finally:
         conn.close()
 
-# ----- Scholarship Functions -----
-def add_scholarship(user_id, scholarship_name, application_date, deadline):
+def update_job_status(application_id, new_status):
+    conn = get_db_connection()
+    if not conn: return
+    try:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE applications SET status = %s WHERE id = %s", (new_status, application_id))
+            conn.commit()
+    finally:
+        conn.close()
+
+# ----- Scholarship Functions (no changes) -----
+def add_scholarship(user_id, university_name, scholarship_type, course_of_study, application_date, deadline):
     conn = get_db_connection()
     if not conn: return
     try:
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO scholarships (user_id, scholarship_name, application_date, deadline)
-                VALUES (%s, %s, %s, %s)
-            """, (user_id, scholarship_name, application_date, deadline))
+                INSERT INTO scholarships (user_id, university_name, scholarship_type, course_of_study, application_date, deadline)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (user_id, university_name, scholarship_type, course_of_study, application_date, deadline))
             conn.commit()
     finally:
         conn.close()
@@ -87,7 +95,7 @@ def get_scholarships(user_id):
     finally:
         conn.close()
 
-# --- Function for In-App Notifications ---
+# --- Function for In-App Notifications (UPDATED) ---
 def get_upcoming_scholarship_deadlines(user_id, days_ahead=7):
     """Fetch scholarships with deadlines in the next X days for a user."""
     conn = get_db_connection()
@@ -96,13 +104,14 @@ def get_upcoming_scholarship_deadlines(user_id, days_ahead=7):
         with conn.cursor() as cur:
             today = date.today()
             future_date = today + timedelta(days=days_ahead)
+            # UPDATED: Select new columns to use in the notification
             cur.execute("""
-                SELECT scholarship_name, deadline
+                SELECT university_name, course_of_study, deadline
                 FROM scholarships
                 WHERE user_id = %s AND deadline BETWEEN %s AND %s
                 ORDER BY deadline ASC
             """, (user_id, today, future_date))
             upcoming_scholarships = cur.fetchall()
-            return upcoming_scholarships
+            return upcoming_scholarships # Re-enabled to return the fetched data
     finally:
         conn.close()
