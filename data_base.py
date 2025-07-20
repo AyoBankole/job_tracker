@@ -22,18 +22,19 @@ def create_tables():
         
     try:
         with conn.cursor() as cur:
-            # Users table (no changes needed here)
+            # UPDATED: Users table now includes a hashed_password column
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS users (
                     id SERIAL PRIMARY KEY,
                     fellow_id TEXT UNIQUE NOT NULL,
                     full_name TEXT,
                     email TEXT,
+                    hashed_password TEXT NOT NULL,      -- Added this line
                     created_at TIMESTAMPTZ DEFAULT NOW()
                 )
             """)
             
-            # UPDATED Applications table
+            # Applications table (no changes from last version)
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS applications (
                     id SERIAL PRIMARY KEY,
@@ -41,24 +42,24 @@ def create_tables():
                     company TEXT NOT NULL,
                     job_title TEXT NOT NULL,
                     application_date DATE,
-                    deadline DATE,                      -- Added deadline
+                    deadline DATE,
                     status TEXT DEFAULT 'Pending',
-                    created_at TIMESTAMPTZ DEFAULT NOW() -- Added timestamp
+                    created_at TIMESTAMPTZ DEFAULT NOW()
                 )
             """)
 
-            # UPDATED Scholarships table
+            # Scholarships table (no changes from last version)
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS scholarships (
                     id SERIAL PRIMARY KEY,
                     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-                    university_name TEXT NOT NULL,      -- New column
-                    scholarship_type TEXT NOT NULL,     -- New column
-                    course_of_study TEXT,               -- New column
+                    university_name TEXT NOT NULL,
+                    scholarship_type TEXT NOT NULL,
+                    course_of_study TEXT,
                     application_date DATE,
                     deadline DATE,
                     status TEXT DEFAULT 'Pending',
-                    created_at TIMESTAMPTZ DEFAULT NOW() -- Added timestamp
+                    created_at TIMESTAMPTZ DEFAULT NOW()
                 )
             """)
             conn.commit()

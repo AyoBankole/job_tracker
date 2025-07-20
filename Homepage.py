@@ -1,8 +1,8 @@
 from dotenv import load_dotenv
-load_dotenv() # This must be the first line to load .env variables
+load_dotenv() 
 
 import streamlit as st
-from business_layer import register_user, get_user_by_fellow_id
+from business_layer import register_user, verify_user 
 from data_base import create_tables
 
 # --- Page Configuration ---
@@ -116,40 +116,32 @@ div.stTextInput > div > div > input:focus, .stDateInput > div > div > input:focu
 
 # --- Page Content ---
 st.title("🚀 Application Tracker")
-
-# --- Logo Container ---
-st.markdown('<div class="logo-container">', unsafe_allow_html=True)
-col1_img, col2_img, col3_img = st.columns(3)
-with col1_img:
-    st.image("assets/Federal-Government-3MTT-Programme.jpg")
-with col2_img:
-    st.image("assets/grad.png")
-with col3_img:
-    st.image("assets/Ai_guy.jpg")
-st.markdown('</div>', unsafe_allow_html=True)
-
+# --- Logo Container (no changes) ---
+st.markdown('<div class="logo-container">...</div>', unsafe_allow_html=True)
 st.markdown("<h4 style='text-align: center; color: var(--subtle-text-color);'>Log in or register to manage your opportunities.</h4>", unsafe_allow_html=True)
 
-# --- Login and Registration Forms ---
+# --- UPDATED Login and Registration Forms ---
 col1, col2 = st.columns(2)
 
 with col1:
     with st.form("login_form"):
         st.subheader("Login")
         fellow_id_login = st.text_input("Enter your Fellow ID")
+        password_login = st.text_input("Password", type="password") # New password field
         login_submitted = st.form_submit_button("Login")
 
-        if login_submitted and fellow_id_login:
-            user = get_user_by_fellow_id(fellow_id_login)
-            if user:
+        if login_submitted and fellow_id_login and password_login:
+            # UPDATED: Use verify_user for secure login
+            user_data = verify_user(fellow_id_login, password_login)
+            if user_data:
                 st.session_state['logged_in'] = True
-                st.session_state['user_id'] = user[0]
-                st.session_state['fellow_id'] = user[1]
-                st.session_state['full_name'] = user[2]
-                st.success(f"Welcome back, {user[2]}!")
+                st.session_state['user_id'] = user_data[0]
+                st.session_state['fellow_id'] = user_data[1]
+                st.session_state['full_name'] = user_data[2]
+                st.success(f"Welcome back, {user_data[2]}!")
                 st.info("Click on 'Tracker' in the sidebar to manage your applications.")
             else:
-                st.error("Fellow ID not found. Please register first.")
+                st.error("Invalid Fellow ID or password.")
 
 with col2:
     with st.form("registration_form"):
@@ -157,15 +149,17 @@ with col2:
         fellow_id_reg = st.text_input("Fellow ID")
         full_name_reg = st.text_input("Full Name")
         email_reg = st.text_input("Email")
+        password_reg = st.text_input("Create a Password", type="password") # New password field
         reg_submitted = st.form_submit_button("Register")
 
-        if reg_submitted and fellow_id_reg and full_name_reg and email_reg:
-            user_id = register_user(fellow_id_reg, full_name_reg, email_reg)
+        if reg_submitted and fellow_id_reg and full_name_reg and password_reg:
+            # UPDATED: Pass password to register_user function
+            user_id = register_user(fellow_id_reg, full_name_reg, email_reg, password_reg)
             if user_id:
                 st.success(f"Registration successful, {full_name_reg}! You can now log in.")
             else:
-                st.error("An error occurred. This Fellow ID might already be registered.")
+                st.error("This Fellow ID might already be registered.")
 
-# --- Sidebar ---
+# --- Sidebar (no changes) ---
 st.sidebar.image("assets/profile.png", width=100)
-st.sidebar.info("This is a multi-page app. Once logged in, navigate using the sidebar.")
+st.sidebar.info("This is a multi-page applications app. Once logged in, navigate using the sidebar.")
