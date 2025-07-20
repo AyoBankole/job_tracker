@@ -116,9 +116,16 @@ div.stTextInput > div > div > input:focus, .stDateInput > div > div > input:focu
 
 # --- Page Content ---
 st.title("🚀 Application Tracker")
-# --- Logo Container (no changes) ---
-st.markdown('<div class="logo-container">...</div>', unsafe_allow_html=True)
-st.markdown("<h4 style='text-align: center; color: var(--subtle-text-color);'>Log in or register to manage your opportunities.</h4>", unsafe_allow_html=True)
+# --- Logo Container ---
+st.markdown('<div class="logo-container">', unsafe_allow_html=True)
+col1_img, col2_img, col3_img = st.columns(3)
+with col1_img:
+    st.image("assets/Federal-Government-3MTT-Programme.jpg")
+with col2_img:
+    st.image("assets/grad.png")
+with col3_img:
+    st.image("assets/Ai_guy.jpg")
+st.markdown('</div>', unsafe_allow_html=True)
 
 # --- UPDATED Login and Registration Forms ---
 col1, col2 = st.columns(2)
